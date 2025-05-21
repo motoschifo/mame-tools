@@ -16,12 +16,9 @@ jobs:
   build:
     runs-on: windows-latest
 
-    strategy:
-      matrix:
-        arch: [x86, x64]
-
     env:
       Configuration: Release
+      MSBUILD_PLATFORM: "Any CPU"
 
     steps:
     - name: Checkout repository
@@ -33,24 +30,23 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore "Mame Tools.sln"
 
-    - name: Build project (${{ matrix.arch }})
+    - name: Build project
       run: |
-        msbuild "Mame Tools.sln" /p:Configuration=${{ env.Configuration }} /p:Platform=${{ matrix.arch }}
+        msbuild "Mame Tools.sln" /p:Configuration=Release /p:Platform="${{ env.MSBUILD_PLATFORM }}"
 
-    - name: Determine build output path
+    - name: Set output path
       id: outpath
-      run: |
-        if ("${{ matrix.arch }}" -eq "x64") {
-          echo "path=src\\bin\\x64\\Release" >> $env:GITHUB_OUTPUT
-        } else {
-          echo "path=src\\bin\\Release" >> $env:GITHUB_OUTPUT
-        }
+      run: echo "path=src\\bin\\Release" >> $GITHUB_OUTPUT
 
-    - name: Prepare output folders (${{ matrix.arch }})
+    - name: Show output path
+      run: |
+          echo "Output path: ${{ steps.outpath.outputs.path }}"
+
+    - name: Prepare output folders
       run: |
         $src = "${{ steps.outpath.outputs.path }}"
-        $sdkDest = "output/ArcadeDatabaseSdk/${{ matrix.arch }}"
-        $toolsDest = "output/MameTools/${{ matrix.arch }}"
+        $sdkDest = "output/ArcadeDatabaseSdk"
+        $toolsDest = "output/MameTools"
         New-Item -ItemType Directory -Force -Path $sdkDest
         New-Item -ItemType Directory -Force -Path $toolsDest
 
@@ -74,12 +70,10 @@ jobs:
         }
 
     - name: Zip ArcadeDatabaseSdk
-      if: matrix.arch == 'x64'
       run: |
         Compress-Archive -Path output/ArcadeDatabaseSdk/* -DestinationPath output/ArcadeDatabaseSdk.zip -Force
 
     - name: Zip MameTools
-      if: matrix.arch == 'x64'
       run: |
         Compress-Archive -Path output/MameTools/* -DestinationPath output/MameTools.zip -Force
 
@@ -88,8 +82,8 @@ jobs:
       with:
         name: zips
         path: |
-          output/ArcadeDatabaseSdk.zip
-          output/MameTools.zip
+          ArcadeDatabaseSdk.zip
+          MameTools.zip
 
   release:
     needs: build

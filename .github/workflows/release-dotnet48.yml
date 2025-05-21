@@ -31,11 +31,11 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Restore NuGet packages
-      run: nuget restore MameXmlParser.sln
+      run: nuget restore "Mame Tools.sln"
 
     - name: Build project (${{ matrix.arch }})
       run: |
-        msbuild MameXmlParser.sln /p:Configuration=${{ env.Configuration }} /p:Platform=${{ matrix.arch }}
+        msbuild "Mame Tools.sln" /p:Configuration=${{ env.Configuration }} /p:Platform=${{ matrix.arch }}
 
     - name: Determine build output path
       id: outpath

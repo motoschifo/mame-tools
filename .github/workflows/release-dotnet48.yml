@@ -1,0 +1,112 @@
+name: Build and Release .NET Framework 4.8
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+  issues: write
+  packages: write
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        arch: [x86, x64]
+
+    env:
+      Configuration: Release
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore MameXmlParser.sln
+
+    - name: Build project (${{ matrix.arch }})
+      run: |
+        msbuild MameXmlParser.sln /p:Configuration=${{ env.Configuration }} /p:Platform=${{ matrix.arch }}
+
+    - name: Determine build output path
+      id: outpath
+      run: |
+        if ("${{ matrix.arch }}" -eq "x64") {
+          echo "path=src\\bin\\x64\\Release" >> $env:GITHUB_OUTPUT
+        } else {
+          echo "path=src\\bin\\Release" >> $env:GITHUB_OUTPUT
+        }
+
+    - name: Prepare output folders (${{ matrix.arch }})
+      run: |
+        $src = "${{ steps.outpath.outputs.path }}"
+        $sdkDest = "output/ArcadeDatabaseSdk/${{ matrix.arch }}"
+        $toolsDest = "output/MameTools/${{ matrix.arch }}"
+        New-Item -ItemType Directory -Force -Path $sdkDest
+        New-Item -ItemType Directory -Force -Path $toolsDest
+
+        Copy-Item "$src/ArcadeDatabaseSdk.Net48.dll" -Destination $sdkDest
+        Copy-Item "$src/ArcadeDatabaseSdk.Net48.dll.config" -Destination $sdkDest -ErrorAction SilentlyContinue
+        Copy-Item "$src/Newtonsoft.Json.dll" -Destination $sdkDest
+        Copy-Item "$src/NLog.dll" -Destination $sdkDest
+        Copy-Item "$src/System.*.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
+        if (Test-Path "$src/it/ArcadeDatabaseSdk.Net48.resources.dll") {
+          New-Item -ItemType Directory -Path "$sdkDest/it" -Force
+          Copy-Item "$src/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$sdkDest/it/"
+        }
+
+        Copy-Item "$src/MameTools.Net48.dll" -Destination $toolsDest
+        Copy-Item "$src/MameTools.Net48.dll.config" -Destination $toolsDest -ErrorAction SilentlyContinue
+        Copy-Item "$src/NLog.dll" -Destination $toolsDest
+        Copy-Item "$src/System.*.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
+        if (Test-Path "$src/it/MameTools.Net48.resources.dll") {
+          New-Item -ItemType Directory -Path "$toolsDest/it" -Force
+          Copy-Item "$src/it/MameTools.Net48.resources.dll" -Destination "$toolsDest/it/"
+        }
+
+    - name: Zip ArcadeDatabaseSdk
+      if: matrix.arch == 'x64'
+      run: |
+        Compress-Archive -Path output/ArcadeDatabaseSdk/* -DestinationPath output/ArcadeDatabaseSdk.zip -Force
+
+    - name: Zip MameTools
+      if: matrix.arch == 'x64'
+      run: |
+        Compress-Archive -Path output/MameTools/* -DestinationPath output/MameTools.zip -Force
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: zips
+        path: |
+          output/ArcadeDatabaseSdk.zip
+          output/MameTools.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: zips
+        path: artifacts
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Release ${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
+        files: |
+          artifacts/ArcadeDatabaseSdk.zip
+          artifacts/MameTools.zip

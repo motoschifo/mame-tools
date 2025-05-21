@@ -35,59 +35,54 @@ jobs:
           msbuild src\ArcadeDatabaseSdk.Net48\ArcadeDatabaseSdk.Net48.csproj /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
           msbuild src\MameTools.Net48\MameTools.Net48.csproj /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
 
-      - name: Prepare output folders
+      - name: Prepare output folder and copy files
         shell: pwsh
         run: |
           $sdkSrc = "src/ArcadeDatabaseSdk.Net48/bin/Release"
           $toolsSrc = "src/MameTools.Net48/bin/Release"
-          $sdkDest = "output/ArcadeDatabaseSdk"
-          $toolsDest = "output/MameTools"
+          $dest = "output/Release"
 
-          New-Item -ItemType Directory -Force -Path $sdkDest
-          New-Item -ItemType Directory -Force -Path $toolsDest
+          New-Item -ItemType Directory -Force -Path $dest
 
-          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll" -Destination $sdkDest
-          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll.config" -Destination $sdkDest -ErrorAction SilentlyContinue
-          Copy-Item "$sdkSrc/Newtonsoft.Json.dll" -Destination $sdkDest
-          Copy-Item "$sdkSrc/NLog.dll" -Destination $sdkDest
-          Copy-Item "$sdkSrc/System.*.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
+          # SDK
+          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll" -Destination $dest
+          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll.config" -Destination $dest -ErrorAction SilentlyContinue
+          Copy-Item "$sdkSrc/Newtonsoft.Json.dll" -Destination $dest
+          Copy-Item "$sdkSrc/NLog.dll" -Destination $dest
+          Copy-Item "$sdkSrc/System.*.dll" -Destination $dest -ErrorAction SilentlyContinue
           if (Test-Path "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll") {
-            New-Item -ItemType Directory -Path "$sdkDest/it" -Force
-            Copy-Item "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$sdkDest/it/"
+            New-Item -ItemType Directory -Path "$dest/it" -Force
+            Copy-Item "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$dest/it/"
           }
 
-          Copy-Item "$toolsSrc/MameTools.Net48.dll" -Destination $toolsDest
-          Copy-Item "$toolsSrc/MameTools.Net48.dll.config" -Destination $toolsDest -ErrorAction SilentlyContinue
-          Copy-Item "$toolsSrc/NLog.dll" -Destination $toolsDest
-          Copy-Item "$toolsSrc/System.*.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
+          # Tools
+          Copy-Item "$toolsSrc/MameTools.Net48.dll" -Destination $dest
+          Copy-Item "$toolsSrc/MameTools.Net48.dll.config" -Destination $dest -ErrorAction SilentlyContinue
+          Copy-Item "$toolsSrc/NLog.dll" -Destination $dest
+          Copy-Item "$toolsSrc/System.*.dll" -Destination $dest -ErrorAction SilentlyContinue
           if (Test-Path "$toolsSrc/it/MameTools.Net48.resources.dll") {
-            New-Item -ItemType Directory -Path "$toolsDest/it" -Force
-            Copy-Item "$toolsSrc/it/MameTools.Net48.resources.dll" -Destination "$toolsDest/it/"
+            New-Item -ItemType Directory -Path "$dest/it" -Force
+            Copy-Item "$toolsSrc/it/MameTools.Net48.resources.dll" -Destination "$dest/it/"
           }
 
-      - name: Zip ArcadeDatabaseSdk
-        run: Compress-Archive -Path output/ArcadeDatabaseSdk/* -DestinationPath output/ArcadeDatabaseSdk.zip -Force
+      - name: Create Release.zip
+        run: Compress-Archive -Path output/Release/* -DestinationPath output/Release.zip -Force
 
-      - name: Zip MameTools
-        run: Compress-Archive -Path output/MameTools/* -DestinationPath output/MameTools.zip -Force
-
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zips
-          path: |
-            output/ArcadeDatabaseSdk.zip
-            output/MameTools.zip
+          name: release
+          path: output/Release.zip
 
   release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download artifacts
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: zips
+          name: release
           path: artifacts
 
       - name: Create GitHub Release
@@ -95,6 +90,4 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
-          files: |
-            artifacts/ArcadeDatabaseSdk.zip
-            artifacts/MameTools.zip
+          files: artifacts/Release.zip

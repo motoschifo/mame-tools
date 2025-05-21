@@ -18,7 +18,7 @@ jobs:
 
     env:
       Configuration: Release
-      MSBUILD_PLATFORM: "Any CPU"
+      MSBUILD_PLATFORM: AnyCPU
 
     steps:
     - name: Checkout repository
@@ -37,7 +37,11 @@ jobs:
 
     - name: Build project
       run: |
-        msbuild "Mame Tools.sln" /p:Configuration=Release /p:Platform="${{ env.MSBUILD_PLATFORM }}"
+        msbuild "Mame Tools.sln" /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
+
+    - name: Check if DLLs exist
+      run: |
+        Get-ChildItem -Recurse -Filter *.dll src\
 
     - name: Prepare output folders
       shell: pwsh

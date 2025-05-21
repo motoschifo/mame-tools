@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MameTools.Net48.Test", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcadeDatabaseSdk.Net48", "src\ArcadeDatabaseSdk.Net48\ArcadeDatabaseSdk.Net48.csproj", "{7EFC7F4A-80E1-42A6-9526-C8B3A3B3485B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcadeDatabaseSdk.Net48.Test", "tests\ArcadeDatabaseSdk.Net48.Test\ArcadeDatabaseSdk.Net48.Test.csproj", "{1C9F749D-E6BB-4BD1-B9FD-C85CEF617820}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{7EFC7F4A-80E1-42A6-9526-C8B3A3B3485B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EFC7F4A-80E1-42A6-9526-C8B3A3B3485B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EFC7F4A-80E1-42A6-9526-C8B3A3B3485B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C9F749D-E6BB-4BD1-B9FD-C85CEF617820}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C9F749D-E6BB-4BD1-B9FD-C85CEF617820}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C9F749D-E6BB-4BD1-B9FD-C85CEF617820}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C9F749D-E6BB-4BD1-B9FD-C85CEF617820}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

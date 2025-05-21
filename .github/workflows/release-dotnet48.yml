@@ -21,92 +21,80 @@ jobs:
       MSBUILD_PLATFORM: AnyCPU
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet packages
-      run: nuget restore "Mame Tools.sln"
+      - name: Restore NuGet packages
+        run: nuget restore "Mame Tools.sln"
 
-    - name: List output folders
-      run: |
-        dir src\ArcadeDatabaseSdk\bin\Release
-        dir src\MameTools\bin\Release
+      - name: Build projects
+        run: |
+          msbuild src\ArcadeDatabaseSdk.Net48\ArcadeDatabaseSdk.Net48.csproj /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
+          msbuild src\MameTools.Net48\MameTools.Net48.csproj /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
 
-    - name: Build project
-      run: |
-        msbuild "Mame Tools.sln" /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
+      - name: Prepare output folders
+        shell: pwsh
+        run: |
+          $sdkSrc = "src/ArcadeDatabaseSdk.Net48/bin/Release"
+          $toolsSrc = "src/MameTools.Net48/bin/Release"
+          $sdkDest = "output/ArcadeDatabaseSdk"
+          $toolsDest = "output/MameTools"
 
-    - name: Check if DLLs exist
-      run: |
-        Get-ChildItem -Recurse -Filter *.dll src\
+          New-Item -ItemType Directory -Force -Path $sdkDest
+          New-Item -ItemType Directory -Force -Path $toolsDest
 
-    - name: Prepare output folders
-      shell: pwsh
-      run: |
-        $sdkSrc = Join-Path $env:GITHUB_WORKSPACE "src/ArcadeDatabaseSdk/bin/Release"
-        $toolsSrc = Join-Path $env:GITHUB_WORKSPACE "src/MameTools/bin/Release"
-        Write-Host "SDK source path: $sdkSrc"
-        Write-Host "Tools source path: $toolsSrc"
+          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll" -Destination $sdkDest
+          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll.config" -Destination $sdkDest -ErrorAction SilentlyContinue
+          Copy-Item "$sdkSrc/Newtonsoft.Json.dll" -Destination $sdkDest
+          Copy-Item "$sdkSrc/NLog.dll" -Destination $sdkDest
+          Copy-Item "$sdkSrc/System.*.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
+          if (Test-Path "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll") {
+            New-Item -ItemType Directory -Path "$sdkDest/it" -Force
+            Copy-Item "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$sdkDest/it/"
+          }
 
-        $sdkDest = Join-Path $env:GITHUB_WORKSPACE "output/ArcadeDatabaseSdk"
-        $toolsDest = Join-Path $env:GITHUB_WORKSPACE "output/MameTools"
-        New-Item -ItemType Directory -Force -Path $sdkDest
-        New-Item -ItemType Directory -Force -Path $toolsDest
+          Copy-Item "$toolsSrc/MameTools.Net48.dll" -Destination $toolsDest
+          Copy-Item "$toolsSrc/MameTools.Net48.dll.config" -Destination $toolsDest -ErrorAction SilentlyContinue
+          Copy-Item "$toolsSrc/NLog.dll" -Destination $toolsDest
+          Copy-Item "$toolsSrc/System.*.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
+          if (Test-Path "$toolsSrc/it/MameTools.Net48.resources.dll") {
+            New-Item -ItemType Directory -Path "$toolsDest/it" -Force
+            Copy-Item "$toolsSrc/it/MameTools.Net48.resources.dll" -Destination "$toolsDest/it/"
+          }
 
-        Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll" -Destination $sdkDest
-        Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll.config" -Destination $sdkDest -ErrorAction SilentlyContinue
-        Copy-Item "$sdkSrc/Newtonsoft.Json.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
-        Copy-Item "$sdkSrc/NLog.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
-        Copy-Item "$sdkSrc/System.*.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
-        if (Test-Path "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll") {
-          New-Item -ItemType Directory -Path "$sdkDest/it" -Force
-          Copy-Item "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$sdkDest/it/"
-        }
+      - name: Zip ArcadeDatabaseSdk
+        run: Compress-Archive -Path output/ArcadeDatabaseSdk/* -DestinationPath output/ArcadeDatabaseSdk.zip -Force
 
-        Copy-Item "$toolsSrc/MameTools.Net48.dll" -Destination $toolsDest
-        Copy-Item "$toolsSrc/MameTools.Net48.dll.config" -Destination $toolsDest -ErrorAction SilentlyContinue
-        Copy-Item "$toolsSrc/NLog.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
-        Copy-Item "$toolsSrc/System.*.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
-        if (Test-Path "$toolsSrc/it/MameTools.Net48.resources.dll") {
-          New-Item -ItemType Directory -Path "$toolsDest/it" -Force
-          Copy-Item "$toolsSrc/it/MameTools.Net48.resources.dll" -Destination "$toolsDest/it/"
-        }
-    
-    - name: Zip ArcadeDatabaseSdk
-      run: |
-        Compress-Archive -Path output/ArcadeDatabaseSdk/* -DestinationPath output/ArcadeDatabaseSdk.zip -Force
+      - name: Zip MameTools
+        run: Compress-Archive -Path output/MameTools/* -DestinationPath output/MameTools.zip -Force
 
-    - name: Zip MameTools
-      run: |
-        Compress-Archive -Path output/MameTools/* -DestinationPath output/MameTools.zip -Force
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: zips
-        path: |
-          output/ArcadeDatabaseSdk.zip
-          output/MameTools.zip
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zips
+          path: |
+            output/ArcadeDatabaseSdk.zip
+            output/MameTools.zip
 
   release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: zips
-        path: artifacts
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: zips
+          path: artifacts
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        name: Release ${{ github.ref_name }}
-        tag_name: ${{ github.ref_name }}
-        files: |
-          artifacts/ArcadeDatabaseSdk.zip
-          artifacts/MameTools.zip
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: |
+            artifacts/ArcadeDatabaseSdk.zip
+            artifacts/MameTools.zip

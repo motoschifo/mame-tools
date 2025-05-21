@@ -30,6 +30,11 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore "Mame Tools.sln"
 
+    - name: List output folders
+      run: |
+        dir src\ArcadeDatabaseSdk\bin\Release
+        dir src\MameTools\bin\Release
+
     - name: Build project
       run: |
         msbuild "Mame Tools.sln" /p:Configuration=Release /p:Platform="${{ env.MSBUILD_PLATFORM }}"
@@ -37,34 +42,35 @@ jobs:
     - name: Prepare output folders
       shell: pwsh
       run: |
-        $src = Join-Path $env:GITHUB_WORKSPACE "src/bin/Release"
-        Write-Host "Source path: $src"
-        Get-ChildItem $src
+        $sdkSrc = Join-Path $env:GITHUB_WORKSPACE "src/ArcadeDatabaseSdk/bin/Release"
+        $toolsSrc = Join-Path $env:GITHUB_WORKSPACE "src/MameTools/bin/Release"
+        Write-Host "SDK source path: $sdkSrc"
+        Write-Host "Tools source path: $toolsSrc"
 
         $sdkDest = Join-Path $env:GITHUB_WORKSPACE "output/ArcadeDatabaseSdk"
         $toolsDest = Join-Path $env:GITHUB_WORKSPACE "output/MameTools"
         New-Item -ItemType Directory -Force -Path $sdkDest
         New-Item -ItemType Directory -Force -Path $toolsDest
 
-        Copy-Item "$src/ArcadeDatabaseSdk.Net48.dll" -Destination $sdkDest
-        Copy-Item "$src/ArcadeDatabaseSdk.Net48.dll.config" -Destination $sdkDest -ErrorAction SilentlyContinue
-        Copy-Item "$src/Newtonsoft.Json.dll" -Destination $sdkDest
-        Copy-Item "$src/NLog.dll" -Destination $sdkDest
-        Copy-Item "$src/System.*.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
-        if (Test-Path "$src/it/ArcadeDatabaseSdk.Net48.resources.dll") {
+        Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll" -Destination $sdkDest
+        Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll.config" -Destination $sdkDest -ErrorAction SilentlyContinue
+        Copy-Item "$sdkSrc/Newtonsoft.Json.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
+        Copy-Item "$sdkSrc/NLog.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
+        Copy-Item "$sdkSrc/System.*.dll" -Destination $sdkDest -ErrorAction SilentlyContinue
+        if (Test-Path "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll") {
           New-Item -ItemType Directory -Path "$sdkDest/it" -Force
-          Copy-Item "$src/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$sdkDest/it/"
+          Copy-Item "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$sdkDest/it/"
         }
 
-        Copy-Item "$src/MameTools.Net48.dll" -Destination $toolsDest
-        Copy-Item "$src/MameTools.Net48.dll.config" -Destination $toolsDest -ErrorAction SilentlyContinue
-        Copy-Item "$src/NLog.dll" -Destination $toolsDest
-        Copy-Item "$src/System.*.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
-        if (Test-Path "$src/it/MameTools.Net48.resources.dll") {
+        Copy-Item "$toolsSrc/MameTools.Net48.dll" -Destination $toolsDest
+        Copy-Item "$toolsSrc/MameTools.Net48.dll.config" -Destination $toolsDest -ErrorAction SilentlyContinue
+        Copy-Item "$toolsSrc/NLog.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
+        Copy-Item "$toolsSrc/System.*.dll" -Destination $toolsDest -ErrorAction SilentlyContinue
+        if (Test-Path "$toolsSrc/it/MameTools.Net48.resources.dll") {
           New-Item -ItemType Directory -Path "$toolsDest/it" -Force
-          Copy-Item "$src/it/MameTools.Net48.resources.dll" -Destination "$toolsDest/it/"
+          Copy-Item "$toolsSrc/it/MameTools.Net48.resources.dll" -Destination "$toolsDest/it/"
         }
-
+    
     - name: Zip ArcadeDatabaseSdk
       run: |
         Compress-Archive -Path output/ArcadeDatabaseSdk/* -DestinationPath output/ArcadeDatabaseSdk.zip -Force

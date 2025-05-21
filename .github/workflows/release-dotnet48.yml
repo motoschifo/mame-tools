@@ -34,17 +34,10 @@ jobs:
       run: |
         msbuild "Mame Tools.sln" /p:Configuration=Release /p:Platform="${{ env.MSBUILD_PLATFORM }}"
 
-    - name: Set output path
-      id: outpath
-      run: echo "path=src\\bin\\Release" >> $GITHUB_OUTPUT
-
-    - name: Show output path
-      run: echo "Output path is ${{ steps.outpath.outputs.path }}"
-
     - name: Prepare output folders
       shell: pwsh
       run: |
-        $src = Join-Path $env:GITHUB_WORKSPACE "${{ steps.outpath.outputs.path }}"
+        $src = Join-Path $env:GITHUB_WORKSPACE "src/bin/Release"
         Write-Host "Source path: $src"
         Get-ChildItem $src
 

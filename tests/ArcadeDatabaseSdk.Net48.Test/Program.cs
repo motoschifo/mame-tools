@@ -20,9 +20,9 @@ internal class Program
     {
         var adbGenres = await ClassificationsService.Get(classificationType: ClassificationType.Genre, language: LanguageKind.en);
         Console.WriteLine($"Found {adbGenres.Data.Count} genres");
-        foreach (var genre in adbGenres.Data.OrderBy(x => x.Title))
+        foreach (var genre in adbGenres.Data.OrderBy(x => x.Description))
         {
-            Console.WriteLine($"- {genre.Title}");
+            Console.WriteLine($"- {genre.Description}");
         }
 
         var currentLanguage = GetCurrentLanguage();
@@ -31,9 +31,9 @@ internal class Program
             adbGenres = await ClassificationsService.Get(classificationType: ClassificationType.Genre, language: currentLanguage);
             Console.WriteLine();
             Console.WriteLine($"Translated to {currentLanguage}");
-            foreach (var genre in adbGenres.Data.OrderBy(x => x.Title))
+            foreach (var genre in adbGenres.Data.OrderBy(x => x.Description))
             {
-                Console.WriteLine($"- {genre.Title}");
+                Console.WriteLine($"- {genre.Description}");
             }
         }
     }

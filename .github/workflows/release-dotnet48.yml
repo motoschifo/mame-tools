@@ -44,9 +44,12 @@ jobs:
     - name: Prepare output folders
       shell: pwsh
       run: |
-        $src = "${{ steps.outpath.outputs.path }}"
-        $sdkDest = "output/ArcadeDatabaseSdk"
-        $toolsDest = "output/MameTools"
+        $src = Join-Path $env:GITHUB_WORKSPACE "${{ steps.outpath.outputs.path }}"
+        Write-Host "Source path: $src"
+        Get-ChildItem $src
+
+        $sdkDest = Join-Path $env:GITHUB_WORKSPACE "output/ArcadeDatabaseSdk"
+        $toolsDest = Join-Path $env:GITHUB_WORKSPACE "output/MameTools"
         New-Item -ItemType Directory -Force -Path $sdkDest
         New-Item -ItemType Directory -Force -Path $toolsDest
 
@@ -82,8 +85,8 @@ jobs:
       with:
         name: zips
         path: |
-          ArcadeDatabaseSdk.zip
-          MameTools.zip
+          output/ArcadeDatabaseSdk.zip
+          output/MameTools.zip
 
   release:
     needs: build

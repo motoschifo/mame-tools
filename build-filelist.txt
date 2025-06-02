@@ -1,0 +1,14 @@
+ArcadeDatabaseSdk:
+  - ArcadeDatabaseSdk.Net48.dll
+  - ArcadeDatabaseSdk.Net48.dll.config
+  - it/ArcadeDatabaseSdk.Net48.resources.dll
+  - Newtonsoft.Json.dll
+  - NLog.dll
+  - System.*.dll
+
+MameTools:
+  - MameTools.Net48.dll
+  - MameTools.Net48.dll.config
+  - it/MameTools.Net48.resources.dll
+  - NLog.dll
+  - System.*.dll

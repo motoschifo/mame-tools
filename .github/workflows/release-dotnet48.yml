@@ -1,0 +1,93 @@
+name: Build and Release .NET Framework 4.8
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+  issues: write
+  packages: write
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      Configuration: Release
+      MSBUILD_PLATFORM: AnyCPU
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore "Mame Tools.sln"
+
+      - name: Build projects
+        run: |
+          msbuild src\ArcadeDatabaseSdk.Net48\ArcadeDatabaseSdk.Net48.csproj /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
+          msbuild src\MameTools.Net48\MameTools.Net48.csproj /p:Configuration=${{ env.Configuration }} /p:Platform=${{ env.MSBUILD_PLATFORM }}
+
+      - name: Prepare output folder and copy files
+        shell: pwsh
+        run: |
+          $sdkSrc = "src/ArcadeDatabaseSdk.Net48/bin/Release"
+          $toolsSrc = "src/MameTools.Net48/bin/Release"
+          $dest = "output/Release"
+
+          New-Item -ItemType Directory -Force -Path $dest
+
+          # SDK
+          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll" -Destination $dest
+          Copy-Item "$sdkSrc/ArcadeDatabaseSdk.Net48.dll.config" -Destination $dest -ErrorAction SilentlyContinue
+          Copy-Item "$sdkSrc/Newtonsoft.Json.dll" -Destination $dest
+          Copy-Item "$sdkSrc/NLog.dll" -Destination $dest
+          Copy-Item "$sdkSrc/System.*.dll" -Destination $dest -ErrorAction SilentlyContinue
+          if (Test-Path "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll") {
+            New-Item -ItemType Directory -Path "$dest/it" -Force
+            Copy-Item "$sdkSrc/it/ArcadeDatabaseSdk.Net48.resources.dll" -Destination "$dest/it/"
+          }
+
+          # Tools
+          Copy-Item "$toolsSrc/MameTools.Net48.dll" -Destination $dest
+          Copy-Item "$toolsSrc/MameTools.Net48.dll.config" -Destination $dest -ErrorAction SilentlyContinue
+          Copy-Item "$toolsSrc/NLog.dll" -Destination $dest
+          Copy-Item "$toolsSrc/System.*.dll" -Destination $dest -ErrorAction SilentlyContinue
+          if (Test-Path "$toolsSrc/it/MameTools.Net48.resources.dll") {
+            New-Item -ItemType Directory -Path "$dest/it" -Force
+            Copy-Item "$toolsSrc/it/MameTools.Net48.resources.dll" -Destination "$dest/it/"
+          }
+
+      - name: Create Release.zip
+        run: Compress-Archive -Path output/Release/* -DestinationPath output/Release.zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: output/Release.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: artifacts/Release.zip

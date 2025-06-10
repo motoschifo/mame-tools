@@ -92,7 +92,7 @@ public class MameMachineCollection : ICollection<MameMachine>
                 Totals.NotMechanicals.IncrementCount(item.Name);
             if (item.Driver.SaveState == SaveStateKind.supported)
                 Totals.SaveSupported.IncrementCount(item.Name);
-            else if (item.Driver.SaveState == SaveStateKind.unsupported)
+            else //if (item.Driver.SaveState == SaveStateKind.unsupported)
                 Totals.SaveUnsupported.IncrementCount(item.Name);
         }
 

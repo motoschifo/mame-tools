@@ -127,6 +127,7 @@
     <Compile Include="SoftwareList\MameSoftwareListCollection.cs" />
     <Compile Include="Software\Info\Info.cs" />
     <Compile Include="Software\MameSoftware.cs" />
+    <Compile Include="Software\MameSoftwareCollection.cs" />
     <Compile Include="Software\Parts\DataAreas\DataArea.cs" />
     <Compile Include="Software\Parts\DataAreas\EndianKind.cs" />
     <Compile Include="Software\Parts\DataAreas\Roms\Rom.cs" />

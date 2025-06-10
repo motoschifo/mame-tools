@@ -18,7 +18,7 @@ public class MameSoftwareList
     public string Name { get; set; } = default!;
     public string? Description { get; set; }
     public string? Notes { get; set; }
-    public MameCollection<Software.MameSoftware> Software { get; private set; } = [];
+    public MameSoftwareCollection Software { get; private set; } = [];
 
     public bool ContainsCloneSoftware { get; set; }
     public bool ContainsParentSoftware { get; set; }

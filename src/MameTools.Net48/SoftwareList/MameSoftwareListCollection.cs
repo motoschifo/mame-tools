@@ -21,6 +21,10 @@ public class MameSoftwareListCollection : ICollection<MameSoftwareList>
     {
         _softwareList.Add(item);
         Totals.SoftwareLists.IncrementCount(item.Name);
+        foreach (var software in item.Software)
+        {
+            AddSoftware(item, software);
+        }
     }
     public void Clear()
     {
@@ -43,9 +47,9 @@ public class MameSoftwareListCollection : ICollection<MameSoftwareList>
     }
     IEnumerator IEnumerable.GetEnumerator() => _softwareList.GetEnumerator();
 
-    public void AddSoftware(MameSoftwareList list, MameSoftware software)
+    private void AddSoftware(MameSoftwareList list, MameSoftware software)
     {
-        list.Software.Add(software);
+        //list.Software.Add(software);
 
         var name = $"{list.Name};{software.Name}";
         // Calcolo totali SL attive/orfane

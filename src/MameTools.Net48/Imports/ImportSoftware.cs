@@ -66,23 +66,23 @@ public static class ImportSoftware
 
         if (!xml.IsEmptyElement)
         {
-            while (xml.Read())
+            do
             {
+                i++;
+                if (i % 1000 == 0)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    progressUpdate?.Invoke($"{prefix}{Strings.SoftwareFileLoading} [{i:#,##0}] - {sl?.Name} - {sl?.Description}");
+                }
                 if (!xml.IsStartElement())
                     continue;
-                cancellationToken.ThrowIfCancellationRequested();
                 if ("softwarelist".EqualsIgnoreCase(xml.LocalName))
                 {
-                    // Inizio di un nodo "game" o "machine"
-                    i++;
-                    if (i % 1000 == 0)
-                        progressUpdate?.Invoke($"{prefix}{Strings.SoftwareFileLoading} [{i:#,##0}] - {sl?.Name} - {sl?.Description}");
-
+                    // Inizio di un nodo "softwarelist"
                     sl = ProcessNodeSoftwareList(xml, loadNodes);
                     mame.SoftwareLists.Add(sl);
-                    continue;
                 }
-            }
+            } while (xml.Read());
         }
         cancellationToken.ThrowIfCancellationRequested();
         xml.Close();
@@ -424,23 +424,23 @@ public static class ImportSoftware
 
                 if (!xml.IsEmptyElement)
                 {
-                    while (xml.Read())
+                    do
                     {
+                        i++;
+                        if (i % 1000 == 0)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            progressUpdate?.Invoke($"{prefix}{Strings.SoftwareFileLoading} [{i:#,##0}] - {sl?.Name} - {sl?.Description}");
+                        }
                         if (!xml.IsStartElement())
                             continue;
-                        cancellationToken.ThrowIfCancellationRequested();
                         if ("softwarelist".EqualsIgnoreCase(xml.LocalName))
                         {
-                            // Inizio di un nodo "game" o "machine"
-                            i++;
-                            if (i % 1000 == 0)
-                                progressUpdate?.Invoke(prefix + Strings.SoftwareHashFileLoading + $" [{i:#,##0}] - {sl?.Name} - {sl?.Description}");
-
+                            // Inizio di un nodo "softwarelist"
                             sl = ProcessNodeSoftwareList(xml, loadNodes);
                             mame.SoftwareListHashes.Add(sl);
-                            continue;
                         }
-                    }
+                    } while (xml.Read());
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 xml.Close();

@@ -6,8 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using MameTools.Net48.Machine;
 using MameTools.Net48.Extensions;
+using MameTools.Net48.Helpers;
+using MameTools.Net48.Machine;
 using MameTools.Net48.Machines.Adjusters;
 using MameTools.Net48.Machines.BiosSets;
 using MameTools.Net48.Machines.Chips;
@@ -172,162 +173,153 @@ public static class ImportMachines
         else if (machine.IsBios)
             machine.Extra.Genre = Strings.Bios;
 
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("description".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-                if (!xml.IsStartElement())
-                    continue;
-
-                if ("description".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    machine.Description = xml.Value;
-                }
-                else if ("year".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    machine.Year = xml.Value;
-                }
-                else if ("manufacturer".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    machine.Manufacturer = xml.Value;
-                }
-                else if ("history".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    machine.History = xml.Value;
-                }
-                else if ("biosset".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.BiosSet) == 0)
-                        continue;
-                    machine.BiosSets.Add(ProcessNodeBiosSet(xml));
-                }
-                else if ("rom".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Rom) == 0)
-                        continue;
-                    machine.Roms.Add(ProcessNodeRom(xml));
-                }
-                else if ("disk".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Disk) == 0)
-                        continue;
-                    machine.Disks.Add(ProcessNodeDisk(xml));
-                    machine.RequiresDisks = true;
-                }
-                else if ("device_ref".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.DeviceRef) == 0)
-                        continue;
-                    machine.DeviceRefs.Add(ProcessNodeDeviceRef(xml));
-                }
-                else if ("sample".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Sample) == 0)
-                        continue;
-                    machine.Samples.Add(ProcessNodeSample(xml));
-                }
-                else if ("chip".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Chip) == 0)
-                        continue;
-                    machine.Chips.Add(ProcessNodeChip(xml));
-                }
-                else if ("display".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Display) == 0)
-                        continue;
-                    machine.Displays.Add(ProcessNodeDisplay(xml));
-                }
-                else if ("sound".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Sound) == 0)
-                        continue;
-                    machine.Sound = ProcessNodeSound(xml);
-                }
-                else if ("input".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Input) == 0)
-                        continue;
-                    machine.Input = ProcessNodeInput(xml, out var legacyValues);
-                    machine.LegacyValues.AddRange(legacyValues);
-                }
-                else if ("dipswitch".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.DipSwitch) == 0)
-                        continue;
-                    machine.DipSwitches.Add(ProcessNodeDipSwitch(xml));
-                }
-                else if ("configuration".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Configuration) == 0)
-                        continue;
-                    machine.Configurations.Add(ProcessNodeConfiguration(xml));
-                }
-                else if ("port".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Port) == 0)
-                        continue;
-                    machine.Ports.Add(ProcessNodePort(xml));
-                }
-                else if ("adjuster".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Adjuster) == 0)
-                        continue;
-                    machine.Adjusters.Add(ProcessNodeAdjuster(xml));
-                }
-                else if ("driver".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Driver) == 0)
-                        continue;
-                    machine.Driver = ProcessNodeDriver(xml, out var legacyValues);
-                    machine.LegacyValues.AddRange(legacyValues);
-                }
-                else if ("feature".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Feature) == 0)
-                        continue;
-                    machine.Features.Add(ProcessNodeFeature(xml));
-                }
-                else if ("device".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Device) == 0)
-                        continue;
-                    machine.Devices.Add(ProcessNodeDevice(xml));
-                }
-                else if ("slot".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.Slot) == 0)
-                        continue;
-                    machine.Slots.Add(ProcessNodeSlot(xml));
-                }
-                else if ("softwarelist".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.SoftwareList) == 0)
-                        continue;
-                    machine.SoftwareList = MameTools.Net48.Imports.ImportMachines.ProcessNodeSoftwareList(xml);
-                }
-                else if ("ramoption".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameMachineNodes.RamOption) == 0)
-                        continue;
-                    machine.RamOptions.Add(ProcessNodeRamOption(xml));
-                }
-                else if ("video".EqualsIgnoreCase(xml.LocalName))
-                {
-                    // Nodo deprecato
-                    if ((loadNodes & MameMachineNodes.Display) == 0)
-                        continue;
-                    machine.Displays.Add(ProcessNodeVideo(xml));
-                }
+                _ = xml.Read();
+                machine.Description = xml.Value;
             }
-        }
-
+            else if ("year".EqualsIgnoreCase(xml.LocalName))
+            {
+                _ = xml.Read();
+                machine.Year = xml.Value;
+            }
+            else if ("manufacturer".EqualsIgnoreCase(xml.LocalName))
+            {
+                _ = xml.Read();
+                machine.Manufacturer = xml.Value;
+            }
+            else if ("history".EqualsIgnoreCase(xml.LocalName))
+            {
+                _ = xml.Read();
+                machine.History = xml.Value;
+            }
+            else if ("biosset".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.BiosSet) == 0)
+                    return;
+                machine.BiosSets.Add(ProcessNodeBiosSet(xml));
+            }
+            else if ("rom".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Rom) == 0)
+                    return;
+                machine.Roms.Add(ProcessNodeRom(xml));
+            }
+            else if ("disk".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Disk) == 0)
+                    return;
+                machine.Disks.Add(ProcessNodeDisk(xml));
+                machine.RequiresDisks = true;
+            }
+            else if ("device_ref".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.DeviceRef) == 0)
+                    return;
+                machine.DeviceRefs.Add(ProcessNodeDeviceRef(xml));
+            }
+            else if ("sample".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Sample) == 0)
+                    return;
+                machine.Samples.Add(ProcessNodeSample(xml));
+            }
+            else if ("chip".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Chip) == 0)
+                    return;
+                machine.Chips.Add(ProcessNodeChip(xml));
+            }
+            else if ("display".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Display) == 0)
+                    return;
+                machine.Displays.Add(ProcessNodeDisplay(xml));
+            }
+            else if ("sound".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Sound) == 0)
+                    return;
+                machine.Sound = ProcessNodeSound(xml);
+            }
+            else if ("input".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Input) == 0)
+                    return;
+                machine.Input = ProcessNodeInput(xml, out var legacyValues);
+                machine.LegacyValues.AddRange(legacyValues);
+            }
+            else if ("dipswitch".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.DipSwitch) == 0)
+                    return;
+                machine.DipSwitches.Add(ProcessNodeDipSwitch(xml));
+            }
+            else if ("configuration".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Configuration) == 0)
+                    return;
+                machine.Configurations.Add(ProcessNodeConfiguration(xml));
+            }
+            else if ("port".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Port) == 0)
+                    return;
+                machine.Ports.Add(ProcessNodePort(xml));
+            }
+            else if ("adjuster".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Adjuster) == 0)
+                    return;
+                machine.Adjusters.Add(ProcessNodeAdjuster(xml));
+            }
+            else if ("driver".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Driver) == 0)
+                    return;
+                machine.Driver = ProcessNodeDriver(xml, out var legacyValues);
+                machine.LegacyValues.AddRange(legacyValues);
+            }
+            else if ("feature".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Feature) == 0)
+                    return;
+                machine.Features.Add(ProcessNodeFeature(xml));
+            }
+            else if ("device".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Device) == 0)
+                    return;
+                machine.Devices.Add(ProcessNodeDevice(xml));
+            }
+            else if ("slot".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.Slot) == 0)
+                    return;
+                machine.Slots.Add(ProcessNodeSlot(xml));
+            }
+            else if ("softwarelist".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.SoftwareList) == 0)
+                    return;
+                machine.SoftwareList = MameTools.Net48.Imports.ImportMachines.ProcessNodeSoftwareList(xml);
+            }
+            else if ("ramoption".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameMachineNodes.RamOption) == 0)
+                    return;
+                machine.RamOptions.Add(ProcessNodeRamOption(xml));
+            }
+            else if ("video".EqualsIgnoreCase(xml.LocalName))
+            {
+                // Nodo deprecato
+                if ((loadNodes & MameMachineNodes.Display) == 0)
+                    return;
+                machine.Displays.Add(ProcessNodeVideo(xml));
+            }
+        });
         FixLegacyValues(machine);
         return machine;
     }
@@ -341,47 +333,38 @@ public static class ImportMachines
             Tag = xml.GetAttribute("tag"),
             Mask = xml.GetAttribute("mask")
         };
-
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("condition".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("condition".EqualsIgnoreCase(xml.LocalName))
+                config.Condition = new Condition
                 {
-                    config.Condition = new Condition
-                    {
-                        Tag = xml.GetAttribute("tag"),
-                        Mask = xml.GetAttribute("mask"),
-                        Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
-                        Value = xml.GetAttribute("value")
-                    };
-                }
-                else if ("conflocation".EqualsIgnoreCase(xml.LocalName))
-                {
-                    config.ConfLocations.Add(new ConfLocation
-                    {
-                        Name = xml.GetAttribute("name"),
-                        Number = xml.GetAttribute<int>("number") ?? 0,
-                        Inverted = "yes".EqualsIgnoreCase(xml.GetAttribute("inverted"))
-                    });
-                }
-                else if ("confsetting".EqualsIgnoreCase(xml.LocalName))
-                {
-                    var setting = new ConfSetting
-                    {
-                        Name = xml.GetAttribute("name"),
-                        Value = xml.GetAttribute("value"),
-                        Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
-                    };
-                    config.ConfSettings.Add(setting);
-                }
+                    Tag = xml.GetAttribute("tag"),
+                    Mask = xml.GetAttribute("mask"),
+                    Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
+                    Value = xml.GetAttribute("value")
+                };
             }
-        }
+            else if ("conflocation".EqualsIgnoreCase(xml.LocalName))
+            {
+                config.ConfLocations.Add(new ConfLocation
+                {
+                    Name = xml.GetAttribute("name"),
+                    Number = xml.GetAttribute<int>("number") ?? 0,
+                    Inverted = "yes".EqualsIgnoreCase(xml.GetAttribute("inverted"))
+                });
+            }
+            else if ("confsetting".EqualsIgnoreCase(xml.LocalName))
+            {
+                var setting = new ConfSetting
+                {
+                    Name = xml.GetAttribute("name"),
+                    Value = xml.GetAttribute("value"),
+                    Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
+                };
+                config.ConfSettings.Add(setting);
+            }
+        });
         return config;
     }
 
@@ -392,23 +375,16 @@ public static class ImportMachines
         {
             Tag = xml.GetAttribute("tag")
         };
-
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("analog".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-                if (!xml.IsStartElement()) continue;
-                if ("analog".EqualsIgnoreCase(xml.LocalName))
+                port.Analogs.Add(new Analog
                 {
-                    port.Analogs.Add(new Analog
-                    {
-                        Mask = xml.GetAttribute("mask")
-                    });
-                }
+                    Mask = xml.GetAttribute("mask")
+                });
             }
-        }
+        });
         return port;
     }
 
@@ -419,27 +395,18 @@ public static class ImportMachines
         {
             Name = xml.GetAttribute("name")
         };
-
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("slotoption".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("slotoption".EqualsIgnoreCase(xml.LocalName))
+                slot.SlotOptions.Add(new SlotOption
                 {
-                    slot.SlotOptions.Add(new SlotOption
-                    {
-                        Name = xml.GetAttribute("name"),
-                        DevName = xml.GetAttribute("devname"),
-                        Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
-                    });
-                }
+                    Name = xml.GetAttribute("name"),
+                    DevName = xml.GetAttribute("devname"),
+                    Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
+                });
             }
-        }
+        });
         return slot;
     }
 
@@ -472,29 +439,19 @@ public static class ImportMachines
             Name = xml.GetAttribute("name"),
             Default = xml.GetAttribute<int>("default") ?? 0
         };
-
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("condition".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("condition".EqualsIgnoreCase(xml.LocalName))
+                adjuster.Condition = new Condition
                 {
-                    adjuster.Condition = new Condition
-                    {
-                        Tag = xml.GetAttribute("tag"),
-                        Mask = xml.GetAttribute("mask"),
-                        Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
-                        Value = xml.GetAttribute("value")
-                    };
-                }
+                    Tag = xml.GetAttribute("tag"),
+                    Mask = xml.GetAttribute("mask"),
+                    Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
+                    Value = xml.GetAttribute("value")
+                };
             }
-        }
-
+        });
         return adjuster;
     }
 
@@ -593,67 +550,52 @@ public static class ImportMachines
             Tag = xml.GetAttribute("tag"),
             Mask = xml.GetAttribute("mask")
         };
-
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("condition".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("condition".EqualsIgnoreCase(xml.LocalName))
+                dipSwitch.Condition = new Condition
                 {
-                    dipSwitch.Condition = new Condition
-                    {
-                        Tag = xml.GetAttribute("tag"),
-                        Mask = xml.GetAttribute("mask"),
-                        Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
-                        Value = xml.GetAttribute("value")
-                    };
-                }
-                else if ("diplocation".EqualsIgnoreCase(xml.LocalName))
-                {
-                    dipSwitch.DipLocations.Add(new DipLocation
-                    {
-                        Name = xml.GetAttribute("name"),
-                        Number = xml.GetAttribute<int>("number") ?? 0,
-                        Inverted = "yes".EqualsIgnoreCase(xml.GetAttribute("inverted"))
-                    });
-                }
-                else if ("dipvalue".EqualsIgnoreCase(xml.LocalName))
-                {
-                    var dipValue = new DipValue
-                    {
-                        Name = xml.GetAttribute("name"),
-                        Value = xml.GetAttribute("value"),
-                        Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
-                    };
-
-                    if (!xml.IsEmptyElement)
-                    {
-                        while (xml.Read())
-                        {
-                            if (xml.NodeType == XmlNodeType.EndElement && "dipvalue".EqualsIgnoreCase(xml.LocalName))
-                                break;
-                            if (!xml.IsStartElement()) continue;
-                            if ("condition".EqualsIgnoreCase(xml.LocalName))
-                            {
-                                dipValue.Condition = new Condition
-                                {
-                                    Tag = xml.GetAttribute("tag"),
-                                    Mask = xml.GetAttribute("mask"),
-                                    Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
-                                    Value = xml.GetAttribute("value")
-                                };
-                            }
-                        }
-                    }
-                    dipSwitch.DipValues.Add(dipValue);
-                }
+                    Tag = xml.GetAttribute("tag"),
+                    Mask = xml.GetAttribute("mask"),
+                    Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
+                    Value = xml.GetAttribute("value")
+                };
             }
-        }
+            else if ("diplocation".EqualsIgnoreCase(xml.LocalName))
+            {
+                dipSwitch.DipLocations.Add(new DipLocation
+                {
+                    Name = xml.GetAttribute("name"),
+                    Number = xml.GetAttribute<int>("number") ?? 0,
+                    Inverted = "yes".EqualsIgnoreCase(xml.GetAttribute("inverted"))
+                });
+            }
+            else if ("dipvalue".EqualsIgnoreCase(xml.LocalName))
+            {
+                var dipValue = new DipValue
+                {
+                    Name = xml.GetAttribute("name"),
+                    Value = xml.GetAttribute("value"),
+                    Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
+                };
+
+                XmlHelper.ReadElementsUntilEnd(xml, reader =>
+                {
+                    if ("condition".EqualsIgnoreCase(xml.LocalName))
+                    {
+                        dipValue.Condition = new Condition
+                        {
+                            Tag = xml.GetAttribute("tag"),
+                            Mask = xml.GetAttribute("mask"),
+                            Relation = Condition.ParseRelation(xml.GetAttribute("relation")),
+                            Value = xml.GetAttribute("value")
+                        };
+                    }
+                });
+                dipSwitch.DipValues.Add(dipValue);
+            }
+        });
         return dipSwitch;
     }
 
@@ -730,31 +672,24 @@ public static class ImportMachines
         //  <!ATTLIST extension name CDATA #REQUIRED>
 
         // Legge i nodi figli di <device> finché non arriva alla fine del nodo device
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("instance".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-                if (!xml.IsStartElement())
-                    continue;
-                if ("instance".EqualsIgnoreCase(xml.LocalName))
+                device.Instance = new Instance
                 {
-                    device.Instance = new Instance
-                    {
-                        Name = xml.GetAttribute("name"),
-                        BriefName = xml.GetAttribute("briefname")
-                    };
-                }
-                else if ("extension".EqualsIgnoreCase(xml.LocalName))
-                {
-                    device.Extensions.Add(new()
-                    {
-                        Name = xml.GetAttribute("name")
-                    });
-                }
+                    Name = xml.GetAttribute("name"),
+                    BriefName = xml.GetAttribute("briefname")
+                };
             }
-        }
+            else if ("extension".EqualsIgnoreCase(xml.LocalName))
+            {
+                device.Extensions.Add(new()
+                {
+                    Name = xml.GetAttribute("name")
+                });
+            }
+        });
         return device;
     }
 
@@ -896,7 +831,7 @@ public static class ImportMachines
             });
         }
 
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
             #region <!ELEMENT input (control*)>
             //	<!ATTLIST input service (yes|no) "no">
@@ -921,34 +856,26 @@ public static class ImportMachines
             //	<control type="pedal" minimum="0" maximum="65280" sensitivity="100" keydelta="40"/>
             //</input>
             #endregion
-            while (xml.Read())
+            if ("control".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("control".EqualsIgnoreCase(xml.LocalName))
+                var control = new Control
                 {
-                    var control = new Control
-                    {
-                        Type = xml.GetAttribute("type"),
-                        Player = xml.GetAttribute<int>("player") ?? 0,
-                        Buttons = xml.GetAttribute<int>("buttons") ?? 0,
-                        RequiredButtons = xml.GetAttribute<int>("reqbuttons") ?? 0,
-                        Minimum = xml.GetAttribute<int>("minimum") ?? 0,
-                        Maximum = xml.GetAttribute<int>("maximum") ?? 0,
-                        Sensitivity = xml.GetAttribute<int>("sensitivity") ?? 0,
-                        KeyDelta = xml.GetAttribute<int>("keydelta") ?? 0,
-                        Reverse = "yes".EqualsIgnoreCase(xml.GetAttribute("reverse")),
-                        Ways = xml.GetAttribute<int>("ways") ?? 0,
-                        Ways2 = xml.GetAttribute<int>("ways2") ?? 0,
-                        Ways3 = xml.GetAttribute<int>("ways3") ?? 0
-                    };
-                    input.Controls.Add(control);
-                }
+                    Type = xml.GetAttribute("type"),
+                    Player = xml.GetAttribute<int>("player") ?? 0,
+                    Buttons = xml.GetAttribute<int>("buttons") ?? 0,
+                    RequiredButtons = xml.GetAttribute<int>("reqbuttons") ?? 0,
+                    Minimum = xml.GetAttribute<int>("minimum") ?? 0,
+                    Maximum = xml.GetAttribute<int>("maximum") ?? 0,
+                    Sensitivity = xml.GetAttribute<int>("sensitivity") ?? 0,
+                    KeyDelta = xml.GetAttribute<int>("keydelta") ?? 0,
+                    Reverse = "yes".EqualsIgnoreCase(xml.GetAttribute("reverse")),
+                    Ways = xml.GetAttribute<int>("ways") ?? 0,
+                    Ways2 = xml.GetAttribute<int>("ways2") ?? 0,
+                    Ways3 = xml.GetAttribute<int>("ways3") ?? 0
+                };
+                input.Controls.Add(control);
             }
-        }
+        });
         return input;
     }
 

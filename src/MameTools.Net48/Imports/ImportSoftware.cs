@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using MameTools.Net48.Extensions;
+using MameTools.Net48.Helpers;
 using MameTools.Net48.Resources;
 using MameTools.Net48.Software;
 using MameTools.Net48.Software.Info;
@@ -87,7 +88,7 @@ public static class ImportSoftware
         cancellationToken.ThrowIfCancellationRequested();
         xml.Close();
         //stopwatch.Stop();
-        //Console.WriteLine($"{mame.Machines.Count} nodes read ({stopwatch.ElapsedMilliseconds} ms)");
+        //Console.WriteLine($"{mame.SoftwareLists.Count} nodes read ({stopwatch.ElapsedMilliseconds} ms)");
 
         //if (useCache)
         //{
@@ -106,26 +107,20 @@ public static class ImportSoftware
             Description = xml.GetAttribute("description")
         };
 
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("notes".EqualsIgnoreCase(reader.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-                if (!xml.IsStartElement())
-                    continue;
-
-                if ("notes".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    sl.Notes = xml.Value;
-                }
-                else if ("software".EqualsIgnoreCase(xml.LocalName))
-                {
-                    sl.Software.Add(ProcessNodeSoftware(xml, loadNodes));
-                }
+                // Legge il contenuto testuale del nodo <notes>
+                _ = reader.Read();
+                sl.Notes = reader.Value;
             }
-        }
+            else if ("software".EqualsIgnoreCase(reader.LocalName))
+            {
+                sl.Software.Add(ProcessNodeSoftware(reader, loadNodes));
+            }
+        });
+
         return sl;
     }
 
@@ -139,55 +134,47 @@ public static class ImportSoftware
             Supported = MameSoftware.ParseSupported(xml.GetAttribute("supported"))
         };
 
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("description".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("description".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    software.Description = xml.Value;
-                }
-                else if ("year".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    software.Year = xml.Value;
-                }
-                else if ("publisher".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    software.Publisher = xml.Value;
-                }
-                else if ("notes".EqualsIgnoreCase(xml.LocalName))
-                {
-                    _ = xml.Read();
-                    software.Notes = xml.Value;
-                }
-                if ("info".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameSoftwareNodes.Info) == 0)
-                        continue;
-                    software.Info.Add(ProcessNodeInfo(xml));
-                }
-                if ("sharedfeat".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameSoftwareNodes.SharedFeature) == 0)
-                        continue;
-                    software.SharedFeatures.Add(ProcessNodeSharedFeature(xml));
-                }
-                if ("part".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameSoftwareNodes.Part) == 0)
-                        continue;
-                    software.Parts.Add(ProcessNodePart(xml, loadNodes));
-                }
+                _ = xml.Read();
+                software.Description = xml.Value;
             }
-        }
+            else if ("year".EqualsIgnoreCase(xml.LocalName))
+            {
+                _ = xml.Read();
+                software.Year = xml.Value;
+            }
+            else if ("publisher".EqualsIgnoreCase(xml.LocalName))
+            {
+                _ = xml.Read();
+                software.Publisher = xml.Value;
+            }
+            else if ("notes".EqualsIgnoreCase(xml.LocalName))
+            {
+                _ = xml.Read();
+                software.Notes = xml.Value;
+            }
+            else if ("info".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameSoftwareNodes.Info) == 0)
+                    return;
+                software.Info.Add(ProcessNodeInfo(xml));
+            }
+            else if ("sharedfeat".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameSoftwareNodes.SharedFeature) == 0)
+                    return;
+                software.SharedFeatures.Add(ProcessNodeSharedFeature(xml));
+            }
+            else if ("part".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameSoftwareNodes.Part) == 0)
+                    return;
+                software.Parts.Add(ProcessNodePart(xml, loadNodes));
+            }
+        });
         return software;
     }
 
@@ -217,41 +204,33 @@ public static class ImportSoftware
             Name = xml.GetAttribute("name"),
             Interface = xml.GetAttribute("interface")
         };
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("feature".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("feature".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameSoftwareNodes.Part_Feature) == 0)
-                        continue;
-                    part.Features.Add(ProcessNodeFeature(xml));
-                }
-                else if ("dataarea".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameSoftwareNodes.Part_DataArea) == 0)
-                        continue;
-                    part.DataAreas.Add(ProcessNodeDataArea(xml));
-                }
-                else if ("diskarea".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameSoftwareNodes.Part_DiskArea) == 0)
-                        continue;
-                    part.DiskAreas.Add(ProcessNodeDiskArea(xml));
-                }
-                else if ("dipswitch".EqualsIgnoreCase(xml.LocalName))
-                {
-                    if ((loadNodes & MameSoftwareNodes.Part_DipSwitch) == 0)
-                        continue;
-                    part.DipSwitches.Add(ProcessNodeDipSwitch(xml));
-                }
+                if ((loadNodes & MameSoftwareNodes.Part_Feature) == 0)
+                    return;
+                part.Features.Add(ProcessNodeFeature(xml));
             }
-        }
+            else if ("dataarea".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameSoftwareNodes.Part_DataArea) == 0)
+                    return;
+                part.DataAreas.Add(ProcessNodeDataArea(xml));
+            }
+            else if ("diskarea".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameSoftwareNodes.Part_DiskArea) == 0)
+                    return;
+                part.DiskAreas.Add(ProcessNodeDiskArea(xml));
+            }
+            else if ("dipswitch".EqualsIgnoreCase(xml.LocalName))
+            {
+                if ((loadNodes & MameSoftwareNodes.Part_DipSwitch) == 0)
+                    return;
+                part.DipSwitches.Add(ProcessNodeDipSwitch(xml));
+            }
+        });
         return part;
     }
 
@@ -274,36 +253,29 @@ public static class ImportSoftware
             DataBits = xml.GetAttribute<int>("databits") ?? 8,
             Endian = DataArea.ParseEndian(xml.GetAttribute("endian"))
         };
-        if (!xml.IsEmptyElement)
+
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("rom".EqualsIgnoreCase(reader.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("rom".EqualsIgnoreCase(xml.LocalName))
+                var rom = new Rom
                 {
-                    var rom = new Rom
-                    {
-                        Name = xml.GetAttribute("name"),
-                        Size = xml.GetAttribute<int>("size") ?? 0,
-                        Length = xml.GetAttribute<int>("length") ?? 0,
-                        CRC = xml.GetAttribute("crc"),
-                        SHA1 = xml.GetAttribute("sha1"),
-                        Offset = xml.GetAttribute("offset"),
-                        Value = xml.GetAttribute("value"),
-                        LoadFlag = Rom.ParseLoadFlag(xml.GetAttribute("loadflag")),
-                        Status = Rom.ParseStatus(xml.GetAttribute("status"))
-                    };
-                    dataArea.Roms.Add(rom);
-                }
+                    Name = reader.GetAttribute("name"),
+                    Size = reader.GetAttribute<int>("size") ?? 0,
+                    Length = reader.GetAttribute<int>("length") ?? 0,
+                    CRC = reader.GetAttribute("crc"),
+                    SHA1 = reader.GetAttribute("sha1"),
+                    Offset = reader.GetAttribute("offset"),
+                    Value = reader.GetAttribute("value"),
+                    LoadFlag = Rom.ParseLoadFlag(reader.GetAttribute("loadflag")),
+                    Status = Rom.ParseStatus(reader.GetAttribute("status"))
+                };
+                dataArea.Roms.Add(rom);
             }
-        }
+        });
+
         return dataArea;
     }
-
     private static DiskArea ProcessNodeDiskArea(XmlReader xml)
     {
         var nodeName = xml.LocalName;
@@ -311,28 +283,20 @@ public static class ImportSoftware
         {
             Name = xml.GetAttribute("name")
         };
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("disk".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("disk".EqualsIgnoreCase(xml.LocalName))
+                var disk = new Disk
                 {
-                    var disk = new Disk
-                    {
-                        Name = xml.GetAttribute("name"),
-                        SHA1 = xml.GetAttribute("sha1"),
-                        Status = Disk.ParseStatus(xml.GetAttribute("status")),
-                        Writeable = "yes".EqualsIgnoreCase(xml.GetAttribute("writeable"))
-                    };
-                    diskArea.Disks.Add(disk);
-                }
+                    Name = xml.GetAttribute("name"),
+                    SHA1 = xml.GetAttribute("sha1"),
+                    Status = Disk.ParseStatus(xml.GetAttribute("status")),
+                    Writeable = "yes".EqualsIgnoreCase(xml.GetAttribute("writeable"))
+                };
+                diskArea.Disks.Add(disk);
             }
-        }
+        });
         return diskArea;
     }
 
@@ -345,27 +309,19 @@ public static class ImportSoftware
             Tag = xml.GetAttribute("tag"),
             Mask = xml.GetAttribute("mask")
         };
-        if (!xml.IsEmptyElement)
+        XmlHelper.ReadElementsUntilEnd(xml, reader =>
         {
-            while (xml.Read())
+            if ("dipvalue".EqualsIgnoreCase(xml.LocalName))
             {
-                if (xml.NodeType == XmlNodeType.EndElement && nodeName.EqualsIgnoreCase(xml.LocalName))
-                    break;
-
-                if (!xml.IsStartElement()) continue;
-
-                if ("dipvalue".EqualsIgnoreCase(xml.LocalName))
+                var dipValue = new DipValue
                 {
-                    var dipValue = new DipValue
-                    {
-                        Name = xml.GetAttribute("name"),
-                        Value = xml.GetAttribute("value"),
-                        Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
-                    };
-                    dipSwitch.DipValues.Add(dipValue);
-                }
+                    Name = xml.GetAttribute("name"),
+                    Value = xml.GetAttribute("value"),
+                    Default = "yes".EqualsIgnoreCase(xml.GetAttribute("default"))
+                };
+                dipSwitch.DipValues.Add(dipValue);
             }
-        }
+        });
         return dipSwitch;
     }
 
@@ -445,7 +401,7 @@ public static class ImportSoftware
                 cancellationToken.ThrowIfCancellationRequested();
                 xml.Close();
                 stopwatch.Stop();
-                Console.WriteLine($"{mame.Machines.Count} nodi letti ({stopwatch.ElapsedMilliseconds} ms)");
+                Console.WriteLine($"{mame.SoftwareListHashes.Count} nodi letti ({stopwatch.ElapsedMilliseconds} ms)");
             }
             catch (Exception ex)
             {

@@ -60,6 +60,7 @@
     <Compile Include="Helpers\MameFileLocation.cs" />
     <Compile Include="Helpers\MameFiles.cs" />
     <Compile Include="Helpers\RecycleBinHelper.cs" />
+    <Compile Include="Helpers\XmlHelper.cs" />
     <Compile Include="Imports\ImportCHDs.cs" />
     <Compile Include="Imports\ImportMachineNames.cs" />
     <Compile Include="Imports\ImportMachines.cs" />

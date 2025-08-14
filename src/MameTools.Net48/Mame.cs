@@ -245,27 +245,14 @@ public class Mame
             //sampleFiles.AddRange(machine.Samples);
         }
 
-        //OrphansSoftware.ResetCount();
-        //foreach (MameSoftwareList softListHash in SoftwareListHashes)
-        //{
-        //    index++;
-        //    progressUpdate?.Invoke($"{Convert.ToInt32(index * 100.0 / total)}%");
-        //    var sl = SoftwareLists.FirstOrDefault(x => x.Name == softListHash.Name);
-        //    if (sl is null)
-        //        OrphansSoftware.IncrementCount(softListHash.Software.Select(x => x.Name).ToList());
-        //    else
-        //        OrphansSoftware.IncrementCount(softListHash.Software.Where(x => !sl.Software.Any(y => y.Name == x.Name)).Select(x => x.Name).ToList());
-        //}
-
         OrphansSoftwareLists.ResetCount();
         OrphansSoftware.ResetCount();
-        //OrphansSoftwareLists.IncrementCount(SoftwareListHashes.Where(x => !SoftwareLists.Any(y => y.Name == x.Name)).Select(x => x.Name).ToList());
         foreach (MameSoftwareList listHash in SoftwareListHashes)
         {
             index++;
             progressUpdate?.Invoke($"{Convert.ToInt32(index * 100.0 / total)}%");
 
-            MameSoftwareList? listXml = SoftwareLists.FirstOrDefault(x => x.Name == listHash.Name);
+            var listXml = SoftwareLists.FirstOrDefault(x => x.Name == listHash.Name);
             if (listXml is null)
             {
                 // Lista non trovata: aggiungo tutti i software come orfani
@@ -277,13 +264,6 @@ public class Mame
                 var soft = listHash.Software.Where(x => !listXml.Software.Any(y => y.Name == x.Name)).ToList();
                 if (soft.Count == 0) continue;
                 OrphansSoftware.IncrementCount([.. soft.Select(x => $"{listXml.Name}/{x.Name}")]);
-                //// Controllo i software nelle due liste
-                //foreach (var softHash in listHash.Software)
-                //{
-                //    var softXml = listXml!.Software.FirstOrDefault(x => x.Name == softHash.Name);
-                //    if (softXml is null) continue;
-                //    OrphansSoftware.IncrementCount(softHash.Name);
-                //}
             }
         }
 

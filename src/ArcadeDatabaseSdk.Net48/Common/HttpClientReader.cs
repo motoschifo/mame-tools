@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
-using static ArcadeDatabaseSdk.Net48.Common.ApiResponse;
 
 namespace ArcadeDatabaseSdk.Net48.Common;
 

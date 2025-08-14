@@ -1,6 +1,4 @@
 ﻿#nullable enable
-using MameTools.Net48.Common;
-
 namespace MameTools.Net48.SoftwareList;
 
 public class MameSoftwareList

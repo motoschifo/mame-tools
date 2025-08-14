@@ -41,4 +41,22 @@ public static class XmlReaderExtensions
     public static bool IsStartElementIgnoreCase(this XmlReader reader, string localName) => reader.IsStartElement() && localName.EqualsIgnoreCase(reader.LocalName);
 
     public static bool IsElement(this XmlReader reader, string name) => reader.NodeType == XmlNodeType.Element && name.EqualsIgnoreCase(reader.LocalName);
+
+    public static void ProcessNode(this XmlReader xml, Action<XmlReader> onElement)
+    {
+        if (xml.IsEmptyElement)
+            return;
+
+        using var subReader = xml.ReadSubtree();
+        subReader.Read(); // posizionati sul nodo radice
+
+        while (subReader.Read())
+        {
+            if (!subReader.IsStartElement())
+                continue;
+
+            onElement(subReader);
+        }
+    }
+
 }

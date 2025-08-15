@@ -64,35 +64,41 @@ public static class ImportSamples
             if (xml.NodeType is not XmlNodeType.Element) continue;
             if ("game".Equals(xml.LocalName, StringComparison.InvariantCultureIgnoreCase) || "machine".Equals(xml.LocalName, StringComparison.InvariantCultureIgnoreCase))
             {
-                // Inizio di un nodo "machine"
-                i++;
-                if (i % 1000 == 0)
-                    progressUpdate?.Invoke($"{prefix}{Strings.SamplesFileLoading} [{i:#,##0}] - {sample?.Description}");
-
-                var name = xml.GetAttribute("name");
-                if (string.IsNullOrEmpty(name)) continue;
-                sample = new Sample()
+                xml.ProcessNode(reader =>
                 {
-                    Name = name
-                };
-                mame.MachineSamples.Add(sample);
-                mame.Machines.Totals.SamplePacks.IncrementCount(sample.Name);
+                    // Inizio di un nodo "machine"
+                    i++;
+                    if (i % 1000 == 0)
+                        progressUpdate?.Invoke($"{prefix}{Strings.SamplesFileLoading} [{i:#,##0}] - {sample?.Description}");
+
+                    var name = reader.GetAttribute("name");
+                    if (string.IsNullOrEmpty(name)) return;
+                    sample = new Sample()
+                    {
+                        Name = name
+                    };
+                    mame.MachineSamples.Add(sample);
+                    mame.Machines.Totals.SamplePacks.IncrementCount(sample.Name);
+                });
             }
             else if ("rom".Equals(xml.LocalName, StringComparison.InvariantCultureIgnoreCase))
             {
                 if (sample is null)
                     throw new Exception(string.Format(Strings.InvalidXmlNodeRelation, "machine/game", "disk") + $" ({filename})");
-                // Inizio di un nodo "rom"
-                // <rom name="vg_voi-3.wav" size="80940" crc="f8040659" sha1="6a5512c23c81a51db60eed65fc8b19c6776daaa8"/>
-                var rom = new SampleRom()
+                xml.ProcessNode(reader =>
                 {
-                    Name = xml.GetAttribute("name"),
-                    Size = xml.GetAttribute<int>("size") ?? 0,
-                    CRC = xml.GetAttribute("crc"),
-                    SHA1 = xml.GetAttribute("sha1")
-                };
-                sample.Roms.Add(rom);
-                mame.Machines.Totals.SampleFiles.IncrementCount($"{sample.Name};{rom.Name}");
+                    // Inizio di un nodo "rom"
+                    // <rom name="vg_voi-3.wav" size="80940" crc="f8040659" sha1="6a5512c23c81a51db60eed65fc8b19c6776daaa8"/>
+                    var rom = new SampleRom()
+                    {
+                        Name = reader.GetAttribute("name"),
+                        Size = reader.GetAttribute<int>("size") ?? 0,
+                        CRC = reader.GetAttribute("crc"),
+                        SHA1 = reader.GetAttribute("sha1")
+                    };
+                    sample.Roms.Add(rom);
+                    mame.Machines.Totals.SampleFiles.IncrementCount($"{sample.Name};{rom.Name}");
+                });
             }
         }
         cancellationToken.ThrowIfCancellationRequested();

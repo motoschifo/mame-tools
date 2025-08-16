@@ -350,6 +350,34 @@ public class Mame
                 //.Append(";").Append(Machines.Totals.BugsFixed)
                 .AppendLine();
             // Riga 4
+            // 0 one player, 0 two players, 0 three players, 0 more than three players
+            _ = sb
+                .Append(";").Append(Machines.Totals.OnePlayer)
+                .Append(";").Append(Machines.Totals.TwoPlayers)
+                .Append(";").Append(Machines.Totals.ThreePlayers)
+                .Append(";").Append(Machines.Totals.MoreThanThreePlayers)
+                .AppendLine();
+            // Riga 5
+            // 0 use stick, 0 use gambling, 0 use joystick, 0 use keyboard, 0 use keypad, 0 use lightgun, 0 use mahjong, 0 use mouse,
+            // 0 use buttons only, 0 use paddle, 0 use pedal, 0 use positional, 0 use dial, 0 use trackball, 0 use hanafuda
+            _ = sb
+                .Append(";").Append(Machines.Totals.InputUseStick)
+                .Append(";").Append(Machines.Totals.InputUseGambling)
+                .Append(";").Append(Machines.Totals.InputUseJoystick)
+                .Append(";").Append(Machines.Totals.InputUseKeyboard)
+                .Append(";").Append(Machines.Totals.InputUseKeypad)
+                .Append(";").Append(Machines.Totals.InputUseLightgun)
+                .Append(";").Append(Machines.Totals.InputUseMahjong)
+                .Append(";").Append(Machines.Totals.InputUseMouse)
+                .Append(";").Append(Machines.Totals.InputUseButtonsOnly)
+                .Append(";").Append(Machines.Totals.InputUsePaddle)
+                .Append(";").Append(Machines.Totals.InputUsePedal)
+                .Append(";").Append(Machines.Totals.InputUsePositional)
+                .Append(";").Append(Machines.Totals.InputUseDial)
+                .Append(";").Append(Machines.Totals.InputUseTrackball)
+                .Append(";").Append(Machines.Totals.InputUseHanafuda)
+                .AppendLine();
+            // Riga 6
             // 714 software list(+1), 137.832 software(+343), 704 active SL(+2), 10 orphan SL(-1), 137.072 active software(+346), 760 orphan software(-3), 95.046 software parents(+274), 42.786 software clones(+69)
             _ = sb
                 .Append(";").Append(SoftwareLists.Totals.SoftwareLists)
@@ -359,7 +387,7 @@ public class Mame
                 .Append(";").Append(SoftwareLists.Totals.Parents)
                 .Append(";").Append(SoftwareLists.Totals.Clones)
                 .AppendLine();
-            // Riga 5
+            // Riga 7
             // 233.686 software roms(+407), 11.065 software CHD(+1), 97.578 supported software(+245), 1.738 partially supported software(+5), 38.516 unsupported software(+93)
             _ = sb
                 .Append(";").Append(SoftwareLists.Totals.SoftwareRoms)
@@ -368,79 +396,6 @@ public class Mame
                 .Append(";").Append(SoftwareLists.Totals.PartiallySupportedSoftware)
                 .Append(";").Append(SoftwareLists.Totals.UnsupportedSoftware)
                 .AppendLine();
-
-            //    _ = sb
-            //        .AppendLine()
-            //        .Append($"$0.{ReleaseNumber}")    // $0.265 [#704]
-            //        .Append($" [#{releaseId ?? "???"}] ***NEW***")
-            //        .AppendLine()
-            //        .AppendLine(releaseDate?.ToString("yyyy/MM/dd") ?? Build)   // aaaa/mm/gg
-            //    ;
-
-            //    // Riga 1
-            //    // 46.750 total items, 3.005 drivers(+8), 40.309 machines(+34), 13.841 parents(+17), 26.544 clones(+17), 76 BIOSes, 6.365 devices(-1 / +22), 1.195 requires CHDs(+1), 1.862 use samples(+22)
-            //    _ = sb
-            //        .Append(Machines.Totals.Items.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.Drivers.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.Machines.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.Parents.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.Clones.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.Bioses.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.Devices.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.RequiresDisks.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.UseSamples.CountFormattedText())
-            //        .AppendLine();
-            //    // Riga 2
-            //    // 15.378 working(+23), 25.007 not working(+11), 15.618 mechanicals(+1), 24.767 not mechanicals(+33), 13.859 save supported(+14), 26.526 save unsupported(+20), 37.180 horizontal screen(+28), 3.205 vertical screen(+6)
-            //    _ = sb
-            //        .Append(Machines.Totals.Working.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.NotWorking.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.Mechanicals.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.NotMechanicals.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.SaveSupported.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.SaveUnsupported.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.HorizontalScreen.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.VerticalScreen.CountFormattedText())
-            //        .AppendLine();
-            //    // Riga 3
-            //    // 351.491 total roms(+254), 348.213 machines roms(+245), 2.658 devices roms(+8), 620 BIOSes roms(+1), 1.325 CHDs(+1), 595 sample files, 77 sample packs, 342.506 good dumps(+249), 5.701 no dumps(+5), 4.609 bad dumps(+1), 6 bugs fixed
-            //    _ = sb
-            //        .Append(Machines.Totals.TotalRoms.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.MachineRoms.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.DevicesRoms.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.BiosRoms.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.TotalDisks.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.SampleFiles.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.SamplePacks.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.GoodDumpsRoms.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.NoDumpsRoms.CountFormattedText())
-            //        .Append(", ").Append(Machines.Totals.BadDumpsRoms.CountFormattedText())
-            //        //.Append(", ").Append(Machines.Totals.BugsFixed.CountFormattedText())
-            //        .AppendLine();
-            //}
-            //if (SoftwareLists.Any() || SoftwareListHashes.Any())
-            //{
-            //    // Riga 4
-            //    // 714 software list(+1), 137.832 software(+343), 704 active SL(+2), 10 orphan SL(-1), 137.072 active software(+346), 760 orphan software(-3), 95.046 software parents(+274), 42.786 software clones(+69)
-            //    _ = sb
-            //        .Append(SoftwareListHashes.Totals.SoftwareLists.CountFormattedText())
-            //        .Append(", ").Append(SoftwareListHashes.Totals.Software.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.SoftwareLists.CountFormattedText())
-            //        .Append(", ").Append(OrphansSoftwareLists.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.Software.CountFormattedText())
-            //        .Append(", ").Append(OrphansSoftware.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.Parents.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.Clones.CountFormattedText())
-            //        .AppendLine();
-            //    // Riga 5
-            //    // 233.686 software roms(+407), 11.065 software CHD(+1), 97.578 supported software(+245), 1.738 partially supported software(+5), 38.516 unsupported software(+93)
-            //    _ = sb
-            //        .Append(SoftwareLists.Totals.SoftwareRoms.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.SoftwareDisks.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.SupportedSoftware.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.PartiallySupportedSoftware.CountFormattedText())
-            //        .Append(", ").Append(SoftwareLists.Totals.UnsupportedSoftware.CountFormattedText())
-            //        .AppendLine();
         }
         return sb.ToString();
     }

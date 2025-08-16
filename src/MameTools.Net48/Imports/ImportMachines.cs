@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using MameTools.Net48.Extensions;
-using MameTools.Net48.Helpers;
 using MameTools.Net48.Machine;
 using MameTools.Net48.Machines.Adjusters;
 using MameTools.Net48.Machines.BiosSets;

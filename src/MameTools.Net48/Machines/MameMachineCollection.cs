@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using MameTools.Net48.Common;
 using MameTools.Net48.Machines;
 using static MameTools.Net48.Machines.Disks.Disk;
 using static MameTools.Net48.Machines.Displays.Display;
@@ -107,6 +108,46 @@ public class MameMachineCollection : ICollection<MameMachine>
         Totals.BadDumpsRoms.IncrementCount([.. item.Roms.Where(x => x.Status == RomStatusKind.baddump).Select(x => $"{item.Name};rom;{x.Name}")]);
         Totals.BadDumpsRoms.IncrementCount([.. item.Disks.Where(x => x.Status == DiskStatusKind.baddump).Select(x => $"{item.Name};disk;{x.Name}")]);
         //Totals.BugsFixed.IncrementCount();  // TODO
+
+        if (item.Input.Players == 1)
+            Totals.OnePlayer.IncrementCount(item.Name);
+        if (item.Input.Players == 2)
+            Totals.TwoPlayers.IncrementCount(item.Name);
+        if (item.Input.Players == 3)
+            Totals.ThreePlayers.IncrementCount(item.Name);
+        if (item.Input.Players > 3)
+
+            Totals.MoreThanThreePlayers.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.stick)))
+            Totals.InputUseStick.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.gambling)))
+            Totals.InputUseGambling.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOneOfType(Machines.Inputs.Control.ControlTypes.joy, Machines.Inputs.Control.ControlTypes.doublejoy, Machines.Inputs.Control.ControlTypes.triplejoy)))
+            Totals.InputUseJoystick.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.keyboard)))
+            Totals.InputUseKeyboard.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.keypad)))
+            Totals.InputUseKeypad.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.lightgun)))
+            Totals.InputUseLightgun.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.mahjong)))
+            Totals.InputUseMahjong.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.mouse)))
+            Totals.InputUseMouse.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.only_buttons)))
+            Totals.InputUseButtonsOnly.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.paddle)))
+            Totals.InputUsePaddle.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.pedal)))
+            Totals.InputUsePedal.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.positional)))
+            Totals.InputUsePositional.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.dial)))
+            Totals.InputUseDial.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.trackball)))
+            Totals.InputUseTrackball.IncrementCount(item.Name);
+        if (item.Input.Controls.Any(x => x.IsOfType(Machines.Inputs.Control.ControlTypes.hanafuda)))
+            Totals.InputUseHanafuda.IncrementCount(item.Name);
 
         item.DriverName = MameMachine.RetrieveDriverNameFromSourceFile(item.IsDevice, item.SourceFile);
         if (item.IsMachine && !string.IsNullOrEmpty(item.SourceFile) && !Totals.DriverNames.Exists(x => x == item.SourceFile))

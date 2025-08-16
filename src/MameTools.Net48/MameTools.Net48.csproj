@@ -98,6 +98,9 @@
     <Compile Include="Machines\Features\FeatureOverallKind.cs" />
     <Compile Include="Machines\Features\FeatureStatusKind.cs" />
     <Compile Include="Machines\Inputs\Control.cs" />
+    <Compile Include="Machines\Inputs\ControlTypeWays.cs" />
+    <Compile Include="Machines\Inputs\ControlTypes.cs" />
+    <Compile Include="Machines\Inputs\ControlWays.cs" />
     <Compile Include="Machines\Inputs\Input.cs" />
     <Compile Include="Machines\Legacy\LegacyValue.cs" />
     <Compile Include="Machines\MameMachine.cs" />

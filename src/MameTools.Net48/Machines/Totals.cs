@@ -1,5 +1,7 @@
 ﻿#nullable enable
 using System.Collections.Generic;
+using System.Security.Policy;
+using System.Threading;
 using MameTools.Net48.Common;
 using MameTools.Net48.Machines.Disks;
 
@@ -45,4 +47,25 @@ public class Totals
     public MameCounterWithDelta GoodDumpsRoms { get; } = new("good dumps");
     public MameCounterWithDelta NoDumpsRoms { get; } = new("no dumps");
     public MameCounterWithDelta BadDumpsRoms { get; } = new("bad dumps");
+
+    public MameCounterWithDelta OnePlayer { get; } = new("one player");
+    public MameCounterWithDelta TwoPlayers { get; } = new("two players");
+    public MameCounterWithDelta ThreePlayers { get; } = new("three players");
+    public MameCounterWithDelta MoreThanThreePlayers { get; } = new("more than three players");
+    
+    public MameCounterWithDelta InputUseStick { get; } = new("use stick");
+    public MameCounterWithDelta InputUseGambling { get; } = new("use gambling");
+    public MameCounterWithDelta InputUseJoystick { get; } = new("use joystick");
+    public MameCounterWithDelta InputUseKeyboard { get; } = new("use keyboard");
+    public MameCounterWithDelta InputUseKeypad { get; } = new("use keypad");
+    public MameCounterWithDelta InputUseLightgun { get; } = new("use lightgun");
+    public MameCounterWithDelta InputUseMahjong { get; } = new("use mahjong");
+    public MameCounterWithDelta InputUseMouse { get; } = new("use mouse");
+    public MameCounterWithDelta InputUseButtonsOnly { get; } = new("use buttons only");
+    public MameCounterWithDelta InputUsePaddle { get; } = new("use paddle");
+    public MameCounterWithDelta InputUsePedal { get; } = new("use pedal");
+    public MameCounterWithDelta InputUsePositional { get; } = new("use positional");
+    public MameCounterWithDelta InputUseDial { get; } = new("use dial");
+    public MameCounterWithDelta InputUseTrackball { get; } = new("use trackball");
+    public MameCounterWithDelta InputUseHanafuda { get; } = new("use hanafuda");
 }

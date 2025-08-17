@@ -14,10 +14,10 @@ public partial class Control
         twoWaysVertical,
         twoWaysStrange,
         threeWays,
-        treeHaldFourWay,
+        treeHaldFourWays,
         fourWays,
         fiveWays,
-        fiveHalfEightWay,
+        fiveHalfEightWays,
         eightWays,
         sixteenWays
     }
@@ -29,9 +29,9 @@ public partial class Control
         { "vertical2", ControlWays.twoWaysVertical },
         { "strange2", ControlWays.twoWaysStrange },
         { "3", ControlWays.threeWays },
-        { "3 (half4)", ControlWays.treeHaldFourWay },
+        { "3 (half4)", ControlWays.treeHaldFourWays },
         { "4", ControlWays.fourWays },
-        { "5 (half8)", ControlWays.fiveHalfEightWay },
+        { "5 (half8)", ControlWays.fiveHalfEightWays },
         { "8", ControlWays.eightWays },
         { "16", ControlWays.sixteenWays }
     };

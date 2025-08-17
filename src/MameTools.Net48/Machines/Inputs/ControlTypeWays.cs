@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MameTools.Net48.Machines.Inputs;
 
@@ -11,7 +10,8 @@ public partial class Control
     {
         public ControlTypes Type { get; set; } = ControlTypes.unknown;
         public ControlWays? Ways { get; set; }
-        public ControlWays[] OtherWays { get; set; } = [];
+        public ControlWays? SecondWays { get; set; }
+        public ControlWays? ThirdWays { get; set; }
     }
 
     public static ControlSpec? Parse(string type, string? ways, string? secondWays, string? thirdWays)
@@ -34,18 +34,12 @@ public partial class Control
             parsedWays = ParseWays(ways);
         }
 
-        // Aggiungo sempre i ways2/ways3, possono essere ridondanti
-        var waysList = new List<ControlWays>();
-        if (!string.IsNullOrEmpty(secondWays))
-            waysList.Add(ParseWays(secondWays));
-        if (!string.IsNullOrEmpty(thirdWays))
-            waysList.Add(ParseWays(thirdWays));
-
         return new ControlSpec
         {
             Type = parsedType,
             Ways = parsedWays,
-            OtherWays = [.. waysList.Distinct()]
+            SecondWays = IsJoystick(parsedType) && !string.IsNullOrEmpty(secondWays) ? ParseWays(secondWays) : null,
+            ThirdWays = IsJoystick(parsedType) && !string.IsNullOrEmpty(thirdWays) ? ParseWays(thirdWays) : null
         };
     }
 

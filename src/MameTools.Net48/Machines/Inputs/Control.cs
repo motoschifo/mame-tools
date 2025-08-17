@@ -31,5 +31,6 @@ public partial class Control
     public static ControlWays ParseWays3(string? value) => ParseControlWays(value, ControlWays.unknown, ControlWays.unknown);
     public bool IsOfType(ControlTypes type) => ParseType(Type) == type;
     public bool IsOneOfType(params ControlTypes[] types) => types.Contains(ParseType(Type));
+    public bool IsJoystick() => IsJoystick(ParseType(Type));
 
 }

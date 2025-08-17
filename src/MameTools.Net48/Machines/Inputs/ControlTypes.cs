@@ -24,4 +24,6 @@ public partial class Control
         trackball,
         triplejoy,
     }
+
+    public static bool IsJoystick(ControlTypes type) => type is ControlTypes.joy or ControlTypes.doublejoy or ControlTypes.triplejoy;
 }

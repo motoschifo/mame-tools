@@ -8,7 +8,7 @@ public static class BaseService
 {
     public static async Task<ApiResponse<StatusApiResult>> Status()
     {
-        // Es. http://adb.arcadeitalia.net/service_generic.php?ajax=qebsite_status
+        // Es. https://adb.arcadeitalia.net/service_generic.php?ajax=qebsite_status
         return await HttpClientReader.GetBaseService<StatusApiResult>("status");
     }
 }

@@ -232,7 +232,7 @@ public class Mame
         // Samples
         Machines.Totals.SamplePacks.ResetCount();
         var samplesMachines = Machines.Where(x => x.UseSample).ToList();
-        Machines.Totals.SamplePacks.IncrementCount([.. samplesMachines.Select(x => x.SampleOf).Distinct()]);
+        Machines.Totals.SamplePacks.IncrementCount([.. samplesMachines.Where(x => !string.IsNullOrEmpty(x.SampleOf)).Select(x => x.SampleOf!).Distinct()]);
 
         Machines.Totals.SampleFiles.ResetCount();
         //var sampleFiles = new List<string>();

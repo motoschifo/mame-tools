@@ -174,6 +174,6 @@ public class HttpClientReader
 
     public static async Task<ApiResponse<T>> GetEmulatorsService<T>(string operation, Dictionary<string, string?>? parameters = null)
     {
-        return await GetService<T>($"{Constants.ClassificationsApiUrl}/{operation}", parameters);
+        return await GetService<T>($"{Constants.EmulatorsApiUrl}/{operation}", parameters);
     }
 }

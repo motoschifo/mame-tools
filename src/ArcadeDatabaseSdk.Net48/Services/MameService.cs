@@ -13,11 +13,9 @@ public static class MameService
         return await HttpClientReader.GetMameService<string>("releases");
     }
 
-    public static async Task<ApiResponse<CategoriesApiResult>> Categories(List<string>? names = null, LanguageKind? language = null)
+    public static async Task<ApiResponse<CategoriesApiResult>> Categories(LanguageKind? language = null)
     {
         var parameters = new Dictionary<string, string?>();
-        if (names is not null && names.Count > 0)
-            parameters.Add("name", string.Join(";", names));
         if (language is not null)
             parameters.Add("language", language.ToString().ToLower());
         return await HttpClientReader.GetMameService<CategoriesApiResult>("categories", parameters);

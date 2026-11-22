@@ -16,7 +16,7 @@ public static class EmulatorsService
         {
             parameters.Add("language", language.ToString().ToLower());
         }
-        ;
+        
         return await HttpClientReader.GetEmulatorsService<EmulatorsApiResult>(emulatorType.ToString().ToLower(), parameters);
     }
 }

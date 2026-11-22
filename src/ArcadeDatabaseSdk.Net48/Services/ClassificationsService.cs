@@ -16,7 +16,7 @@ public static class ClassificationsService
         {
             parameters.Add("language", language.ToString().ToLower());
         }
-        ;
+        
         return await HttpClientReader.GetClassificationsService<ClassificationsApiResult>(classificationType.ToString().ToLower(), parameters);
     }
 }

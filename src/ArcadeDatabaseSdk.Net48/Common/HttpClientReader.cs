@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -20,13 +21,18 @@ public class HttpClientReader
 
     static HttpClientReader()
     {
-        _client = new HttpClient
+        var handler = new HttpClientHandler
         {
-            Timeout = TimeSpan.FromSeconds(_timeoutSeconds),
+            AutomaticDecompression = DecompressionMethods.GZip
         };
-        _client.DefaultRequestHeaders.Add("User-Agent", "ArcadeDatabaseSdk.Net48/1.0");
-    }
 
+        _client = new HttpClient(handler)
+        {
+            Timeout = TimeSpan.FromSeconds(_timeoutSeconds)
+        };
+
+        _client.DefaultRequestHeaders.Add("User-Agent", "ArcadeDatabaseSdk.Net48/1.1");
+    }
     public static void SetTimeout(int seconds)
     {
         _timeoutSeconds = seconds;
